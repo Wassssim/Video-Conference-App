@@ -1,0 +1,11 @@
+version: "3"
+services:
+  linux:
+    image: "ubuntu"
+    restart: "always"
+    tty: true
+    ports:
+      - "3000:3000"
+      - "2000-2020:2000-2020"
+    volumes:
+      - "./src:/usr/src"
