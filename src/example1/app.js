@@ -79,22 +79,32 @@ const mediaCodecs = [
 peers.on('connection', async socket => {
     console.log(socket.id);
     socket.emit('connection-success', {
-        socketId: socket.id
+        socketId: socket.id,
+        existsProducer: producer !== undefined
     });
-
-    router = await worker.createRouter({ mediaCodecs });
 
     socket.on('disconnect', () => {
         // cleanup
         console.log('peer disconnected');
     });
 
-    socket.on('getRtpCapabilities', (callback) => {
+    socket.on('createRoom', async (callback) => {
+        if (router === undefined) {
+            router = await worker.createRouter({ mediaCodecs });
+            console.log("Router ID", router.id);
+        }
+
         const rtpCapabilities = router.rtpCapabilities;
         console.log('rtp Capabilities', rtpCapabilities);
 
-        callback({rtpCapabilities});
+        getRtpCapabilities(callback);
     })
+
+    const getRtpCapabilities = (callback) => {
+        const rtpCapabilities = router.rtpCapabilities;
+
+        callback({rtpCapabilities});
+    }
 
     socket.on('createWebRtcTransport', async ({ sender }, callback ) => {
         console.log(`Is this a sender request? ${sender}`)
